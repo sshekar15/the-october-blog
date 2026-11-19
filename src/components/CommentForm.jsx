@@ -1,8 +1,10 @@
 
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { AuthContext } from "./AuthContext";
 
 function CommentForm({ onAddComment }) {
-  const [name, setName] = useState("");
+  const { user } = useContext(AuthContext);
+
   const [commentText, setCommentText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -10,7 +12,7 @@ function CommentForm({ onAddComment }) {
   async function handleSubmit(event) {
     event.preventDefault();
 
-    if (!name.trim() || !commentText.trim()) {
+    if (!commentText.trim()) {
       return;
     }
 
@@ -19,11 +21,10 @@ function CommentForm({ onAddComment }) {
 
     try {
       await onAddComment({
-        name: name.trim(),
+        name: user.username,
         text: commentText.trim(),
       });
 
-      setName("");
       setCommentText("");
     } catch (error) {
       setError("Sorry, your comment could not be submitted. Please try again.");
@@ -34,22 +35,14 @@ function CommentForm({ onAddComment }) {
 
   return (
     <form className="post-comment-form" onSubmit={handleSubmit}>
-      <label htmlFor="commenter-name">Your Name</label>
-      <input
-        id="commenter-name"
-        type="text"
-        value={name}
-        onChange={(event) => setName(event.target.value)}
-        placeholder="Enter your name"
-        required
-      />
+      <p>Leave a comment as: <strong>{user.username}</strong></p>
 
       <label htmlFor="comment-text">Your Comment</label>
       <textarea
         id="comment-text"
         value={commentText}
         onChange={(event) => setCommentText(event.target.value)}
-        placeholder="Write your comment..."
+        placeholder="Hello, who is this? Leave me a comment..."
         rows="4"
         required
       />

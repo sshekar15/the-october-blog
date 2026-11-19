@@ -1,11 +1,15 @@
 
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useContext, useEffect, useState } from "react";
 import { ThemeContext } from "./ThemeContext";
+import { AuthContext } from "./AuthContext";
 import logo from "../assets/logoBlog.png";
 
 function Header() {
   const { theme, toggleTheme } = useContext(ThemeContext);
+  const { user, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
+
   const [postsOpen, setPostsOpen] = useState(false);
   const [posts, setPosts] = useState([]);
 
@@ -24,6 +28,11 @@ function Header() {
         console.error("Error fetching header posts:", error);
       });
   }, []);
+
+  function handleLogout() {
+    logout();
+    navigate("/");
+  }
 
   return (
     <header className="site-header">
@@ -65,6 +74,26 @@ function Header() {
         </div>
 
         <Link to="/contact">Contact</Link>
+
+        {user ? (
+          <>
+      <button
+      type="button"
+      className="auth-button"
+      onClick={handleLogout}
+    >
+      Logout
+    </button>
+
+    <span className="welcome-user">
+      Welcome, {user.username}!
+    </span>
+  </>
+) : (
+  <Link to="/login" className="auth-link">
+    Login
+  </Link>
+)}
 
         <button
           type="button"

@@ -1,13 +1,15 @@
 
 import { Link, useParams } from "react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import CommentForm from "../components/CommentForm";
+import { AuthContext } from "../components/AuthContext";
 
 function IndividualPostPage() {
   const { id } = useParams();
+  const { user } = useContext(AuthContext);
 
   const [post, setPost] = useState(null);
-  const [user, setUser] = useState(null);
+  const [postAuthor, setPostAuthor] = useState(null);
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -47,7 +49,7 @@ function IndividualPostPage() {
         const userData = await userResponse.json();
         const commentsData = await commentsResponse.json();
 
-        setUser(userData);
+        setPostAuthor(userData);
 
         setComments(
           commentsData.map((comment) => ({
@@ -133,8 +135,8 @@ function IndividualPostPage() {
         <h1>{post.title}</h1>
 
         <div className="post-details">
-          <span>By {user ? user.name : "Unknown Author"}</span>
-          {user && <span>{user.email}</span>}
+          <span>By {postAuthor ? postAuthor.name : "Unknown Author"}</span>
+          {postAuthor && <span>{postAuthor.email}</span>}
         </div>
 
         <div className="post-content">
@@ -150,10 +152,16 @@ function IndividualPostPage() {
         <h2>Comments</h2>
 
         <p className="comments-description">
-          Share your thoughts about this post!
+          Share your thoughts about this post! Or don't. We don't mind.
         </p>
 
-        <CommentForm onAddComment={handleAddComment} />
+        {user ? (
+          <CommentForm onAddComment={handleAddComment} />
+        ) : (
+          <p className="login-comment-message">
+            No can do! Please <Link to="/login">log in</Link> to leave a comment.
+          </p>
+        )}
 
         <div className="post-comments-list">
           {comments.length === 0 ? (

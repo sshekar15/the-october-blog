@@ -1,7 +1,10 @@
 
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { Link } from "react-router";
+import { AuthContext } from "./AuthContext";
 
 function CommentSection() {
+  const { user } = useContext(AuthContext);
   const [comment, setComment] = useState("");
 
   const [comments, setComments] = useState([
@@ -16,24 +19,28 @@ function CommentSection() {
       text: "Halloween is my favorite time of year."
     },
     {
-    id: 3,
-    author: "Freddy Krueger",
-    text: "A Nightmare on Elm Street is a classic. Sweet dreams!"
+      id: 3,
+      author: "Freddy Krueger",
+      text: "A Nightmare on Elm Street is a classic. Sweet dreams!"
     },
   ]);
 
   function handleSubmit(event) {
     event.preventDefault();
 
-    if (comment.trim() === "") return;
+    if (!comment.trim()) return;
 
     const newComment = {
       id: Date.now(),
-      author: "Guest",
+      author: user.username,
       text: comment.trim()
     };
 
-    setComments([...comments, newComment]);
+    setComments((currentComments) => [
+      ...currentComments,
+      newComment
+    ]);
+
     setComment("");
   }
 
@@ -42,25 +49,33 @@ function CommentSection() {
       <h2>Join the Conversation</h2>
 
       <p className="comment-intro">
-        Share your thoughts about this blog!
+        Share your thoughts about this blog! Or don't. We don't mind.
       </p>
 
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="comment">Leave your thoughts:</label>
+      {user ? (
+        <form onSubmit={handleSubmit}>
+          <p>Leave a comment as: <strong>{user.username}</strong></p>
 
-        <textarea
-          id="comment"
-          value={comment}
-          onChange={(event) => setComment(event.target.value)}
-          placeholder="Hello, who is this? Leave me a comment..."
-          rows="3"
-          required
-        />
+          <label htmlFor="comment">Leave your thoughts:</label>
 
-        <button type="submit" className="submit-button">
-          Submit Comment
-        </button>
-      </form>
+          <textarea
+            id="comment"
+            value={comment}
+            onChange={(event) => setComment(event.target.value)}
+            placeholder="Hello, who is this? Leave me a comment..."
+            rows="3"
+            required
+          />
+
+          <button type="submit" className="submit-button">
+            Submit Comment
+          </button>
+        </form>
+      ) : (
+        <p className="login-comment-message">
+          No can do! Please <Link to="/login">log in</Link> to join the conversation!
+        </p>
+      )}
 
       <h3>Comments ({comments.length})</h3>
 
